@@ -3,31 +3,35 @@ services:
     redis:
         image: 'redis:3.2.7'
         # command: redis-server --requirepass redispass
+        ports:
+            - "6379:6379"
 
-    postgres:
-        image: postgres:9.6
+    db:
+        image: mysql:5.7.24
+        restart: always
+        volumes:
+            - ./data/db:/var/lib/mysql
         environment:
-            - POSTGRES_USER=airflow
-            - POSTGRES_PASSWORD=airflow
-            - POSTGRES_DB=airflow
-        # Uncomment these lines to persist data on the local filesystem.
-        #     - PGDATA=/var/lib/postgresql/data/pgdata
-        # volumes:
-        #     - ./pgdata:/var/lib/postgresql/data/pgdata
+            - MYSQL_ROOT_PASSWORD=root
+            - MYSQL_USER=airflow
+            - MYSQL_PASSWORD=airflow
+            - MYSQL_DATABASE=airflow
+        ports:
+            - "3306:3306"
 
     webserver:
-        image: puckel/docker-airflow:1.10.0-4
+        image: chandu/docker-airflow:latest
         restart: always
         depends_on:
-            - postgres
+            - db
             - redis
         environment:
             - LOAD_EX=n
             - FERNET_KEY=46BKJoQYlPPOexq0OhDZnIlNepKFf87WFwLbfzqDDho=
             - EXECUTOR=Celery
-            # - POSTGRES_USER=airflow
-            # - POSTGRES_PASSWORD=airflow
-            # - POSTGRES_DB=airflow
+            # - MYSQL_USER=airflow
+            # - MYSQL_PASSWORD=airflow
+            # - MYSQL_DATABASE=airflow
             # - REDIS_PASSWORD=redispass
         volumes:
             - ./dags:/usr/local/airflow/dags
@@ -43,7 +47,7 @@ services:
             retries: 3
 
     flower:
-        image: puckel/docker-airflow:1.10.0-4
+        image: chandu/docker-airflow:latest
         restart: always
         depends_on:
             - redis
@@ -55,7 +59,7 @@ services:
         command: flower
 
     scheduler:
-        image: puckel/docker-airflow:1.10.0-4
+        image: chandu/docker-airflow:latest
         restart: always
         depends_on:
             - webserver
@@ -74,7 +78,7 @@ services:
         command: scheduler
 
     worker:
-        image: puckel/docker-airflow:1.10.0-4
+        image: chandu/docker-airflow:latest
         restart: always
         depends_on:
             - scheduler
