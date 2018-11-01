@@ -20,7 +20,7 @@ services:
             - "3306:3306"
 
     webserver:
-        image: cckavar/docker-airflow:latest
+        image: cckavar/docker-airflow-mysql:latest
         restart: always
         depends_on:
             - db
@@ -47,7 +47,7 @@ services:
             retries: 3
 
     flower:
-        image: cckavar/docker-airflow:latest
+        image: cckavar/docker-airflow-mysql:latest
         restart: always
         depends_on:
             - redis
@@ -59,7 +59,7 @@ services:
         command: flower
 
     scheduler:
-        image: cckavar/docker-airflow:latest
+        image: cckavar/docker-airflow-mysql:latest
         restart: always
         depends_on:
             - webserver
@@ -78,7 +78,7 @@ services:
         command: scheduler
 
     worker:
-        image: cckavar/docker-airflow:latest
+        image: cckavar/docker-airflow-mysql:latest
         restart: always
         depends_on:
             - scheduler
